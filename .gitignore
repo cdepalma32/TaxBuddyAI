@@ -122,6 +122,19 @@ dist
 # TernJS port file
 .tern-port
 
+
+# Python cache
+__pycache__/
+Scripts/__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+venv/
+.env
+
+# VS Code
+.vscode/
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 

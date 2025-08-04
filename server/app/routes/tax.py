@@ -40,9 +40,3 @@ def check_connection(db: Session = Depends(get_db)):
     result = db.execute("SELECT 1").fetchone()
     return {"status": "connected", "result": result}
 
-# ORIGINAL SCAFFOLD CONTENT FOR tax.py
- # @router.post("/")
-# def get_tax_tip(data: TaxFormInput, current_user=Depends(get_current_user)):
-   #  prompt = f"Suggest a tax-saving tip for income: {data.income}, deductions: {data.deductions}"
-    # response = call_openai(prompt)
-    # return {"tip": response}
