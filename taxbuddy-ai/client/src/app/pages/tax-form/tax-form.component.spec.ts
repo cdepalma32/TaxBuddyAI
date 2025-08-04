@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TaxForm } from './tax-form';
+import { TaxFormComponent } from './tax-form.component';
 
-describe('TaxForm', () => {
-  let component: TaxForm;
-  let fixture: ComponentFixture<TaxForm>;
+describe('TaxFormComponent', () => {
+  let component: TaxFormComponent;
+  let fixture: ComponentFixture<TaxFormComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TaxForm]
+      imports: [TaxFormComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(TaxForm);
+    fixture = TestBed.createComponent(TaxFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -3,8 +3,8 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-result',
   imports: [],
-  templateUrl: './result.html',
-  styleUrl: './result.scss'
+  templateUrl: './result.component.html',
+  styleUrl: './result.component.scss'
 })
 export class ResultComponent {
 
