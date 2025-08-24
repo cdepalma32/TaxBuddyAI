@@ -1,11 +1,28 @@
-from sqlalchemy import create_engine
+# server/app/db.py
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-from .config import AZURE_SQL_URL
+from .core.config import AZURE_SQL_URL
 
 # Create the SQLAlchemy engine using the URL from config.py
-engine = create_engine(AZURE_SQL_URL)
+# pool_pre_ping helps avoid stale connections (useful locally and on Azure)
+engine = create_engine(
+    AZURE_SQL_URL,
+    echo=False,
+    pool_pre_ping=True,
+)
 
-# Set up the session factory to manage DB sesssions
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Session factory
+SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
+# Dependency for FastAPI routes
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
+# Optional: quick connectivity check used on startup
+def ping_db():
+    with engine.connect() as conn:
+        conn.execute(text("SELECT 1"))

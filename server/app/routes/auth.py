@@ -1,12 +1,24 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter
+from pydantic import BaseModel
 
-router = APIRouter()
+router = APIRouter(prefix="/auth", tags=["auth"])
+
+# Request body model
+class LoginInput(BaseModel):
+    email: str
+    password: str
 
 @router.post("/login")
-def login_user(credentials: dict):
-    return {"token": "mock-token", "refresh": "mock-refresh-token"}
+def login_user(credentials: LoginInput):
+    # TODO: verify user & issue real JWT
+    return {
+        "access_token": "mock-token",
+        "token_type": "bearer",
+        "refresh_token": "mock-refresh-token",
+        "user": {"email": credentials.email}
+    }
 
-# Add this for now—can improve later
+# Temporary dependency used by protected routes
 def get_current_user():
-    # This should eventually verify user/session/token
-    return {"user": "mock-user"}
+    # TODO: decode/verify JWT from Authorization header
+    return {"id": 1, "email": "demo@example.com"}
