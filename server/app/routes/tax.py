@@ -16,7 +16,7 @@ class TaxFormInput(BaseModel):
     income: float
     deductions: float
 
-class CheckResponse(BaseModel):            # <-- NEW: response model for /tax/check
+class CheckResponse(BaseModel):
     status: str
     ok: int
 
@@ -37,7 +37,7 @@ def get_tax_tip(
     response = call_openai(prompt)
     return {"tip": response}
 
-@router.get("/check", response_model=CheckResponse)    # <-- NEW: docs schema
+@router.get("/check", response_model=CheckResponse)
 def check_connection(db: Session = Depends(get_db)):
     try:
         row = db.execute(text("SELECT 1 AS ok")).fetchone()
