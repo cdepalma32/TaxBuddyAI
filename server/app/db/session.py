@@ -1,7 +1,8 @@
 # server/app/db.py
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-from .core.config import AZURE_SQL_URL
+from app.core.config import AZURE_SQL_URL
+
 
 # Create the SQLAlchemy engine using the URL from config.py
 # pool_pre_ping helps avoid stale connections (useful locally and on Azure)

@@ -5,8 +5,8 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
-from app.db import get_db
-from app.routes.auth import get_current_user
+from app.db.session import get_db
+from app.routers.auth import get_current_user
 from app.services.llm import call_openai
 
 router = APIRouter(prefix="/tax", tags=["tax"])

@@ -1,10 +1,12 @@
-# server/app/main.py
+# Server/app/main.py  - application root
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from .db import ping_db
-from .routes.tax import router as tax_router
-from .routes.auth import router as auth_router
+# Import path for ping_db after moving to db/session.py
+from app.db.session import ping_db
+from app.routers.tax import router as tax_router
+from app.routers.auth import router as auth_router
 
+# Infra checks / startup logic
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # --- startup ---
@@ -27,9 +29,10 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="TaxBuddy AI API", version="0.1.0", lifespan=lifespan)
 
+# Feature composition
 app.include_router(auth_router)
 app.include_router(tax_router)
 
-@app.get("/")
+@app.get("/") #health + debug
 def home():
     return {"status": "ok", "routes": ["/auth/login", "/tax/check", "/docs"]}
