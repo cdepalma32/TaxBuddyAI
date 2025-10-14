@@ -1,1 +1,17 @@
-<p>tax-form works!</p>
+<form (ngSubmit)="submit()">
+  <label>
+    Income
+    <input type="number" [(ngModel)]="income" name="income" required />
+  </label>
+
+  <label>
+    Deductions
+    <input type="number" [(ngModel)]="deductions" name="deductions" required />
+  </label>
+
+  <button type="submit" [disabled]="loading">Get Tip</button>
+</form>
+
+<p *ngIf="loading">Calculating…</p>
+<p *ngIf="errorMsg" class="error">{{ errorMsg }}</p>
+<pre *ngIf="tip">Tip: {{ tip }}</pre>

@@ -1,46 +1,34 @@
-// client/src/app/services/auth.ts
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
-@Injectable({
-  providedIn: 'root'
-})
+interface LoginResponse {
+  access_token: string;
+  user: { email: string; role?: string };
+}
+
+@Injectable({ providedIn: 'root' })
 export class Auth {
-  private apiUrl = 'http://127.0.0.1:8000/auth/login';
+  private API = 'http://127.0.0.1:8000';
 
   constructor(private http: HttpClient) {}
 
-  /** Perform login and store the JWT in localStorage */
-  login(email: string, password: string): Observable<any> {
-    const body = new URLSearchParams();
-    body.set('username', email);      // FastAPI expects OAuth2 username
-    body.set('password', password);
-
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/x-www-form-urlencoded'
-    });
-
-    return this.http.post<{ access_token: string }>(this.apiUrl, body.toString(), { headers })
+  login(email: string, password: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.API}/auth/login`, { email, password })
       .pipe(
-        tap(response => {
-          localStorage.setItem('access_token', response.access_token);
+        tap(res => {
+          localStorage.setItem('access_token', res.access_token);
+          localStorage.setItem('user_email', res.user?.email ?? '');
         })
       );
   }
 
-  /** Remove JWT (logout) */
-  logout(): void {
+  logout() {
     localStorage.removeItem('access_token');
+    localStorage.removeItem('user_email');
   }
 
-  /** Retrieve stored JWT */
-  getToken(): string | null {
-    return localStorage.getItem('access_token');
-  }
-
-  /** Simple check for logged-in state */
-  isAuthenticated(): boolean {
-    return !!this.getToken();
-  }
+  get token(): string | null { return localStorage.getItem('access_token'); }
+  isLoggedIn(): boolean { return !!this.token; }
 }

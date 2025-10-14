@@ -1,6 +1,7 @@
 # Server/app/main.py  - application root
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
+from fastapi.middleware.cors import CORSMiddleware
 # Import path for ping_db after moving to db/session.py
 from app.db.session import ping_db
 from app.routers.tax import router as tax_router
@@ -29,35 +30,22 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="TaxBuddy AI API", version="0.1.0", lifespan=lifespan)
 
-# Feature composition
+# --- CORS (Angular dev -> FastAPI) ---
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:4200",
+        "http://127.0.0.1:4200",
+    ],
+    allow_credentials=True,                 # not required unless you use cookies
+    allow_methods=["*"],                    # or ["GET","POST","OPTIONS",...]
+    allow_headers=["*", "Authorization", "Content-Type"],
+)
+
+# Routers
 app.include_router(auth_router)
 app.include_router(tax_router)
 
-from fastapi.openapi.utils import get_openapi  # <-- add import
-
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
-    openapi_schema = get_openapi(
-        title=app.title,
-        version=app.version,
-        routes=app.routes,
-        description="TaxBuddy AI API",
-    )
-    openapi_schema.setdefault("components", {}).setdefault("securitySchemes", {})
-    openapi_schema["components"]["securitySchemes"]["bearerAuth"] = {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT",
-    }
-    # Require bearer by default for all routes (you can still override per-route)
-    openapi_schema["security"] = [{"bearerAuth": []}]
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
-
-app.openapi = custom_openapi
-
-#health + debug
 @app.get("/")
 def home():
     return {"status": "ok", "routes": ["/auth/login", "/tax/check", "/docs"]}
