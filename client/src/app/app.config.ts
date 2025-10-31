@@ -1,14 +1,24 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+  HTTP_INTERCEPTORS
+} from '@angular/common/http';
 
 import { appRoutes } from './app.routes';
+import { TokenInterceptor } from './services/token-interceptor.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(appRoutes), 
-    provideHttpClient(), // no interceptors yet
+    provideRouter(appRoutes),
+
+    // Enable HttpClient and tell Angular to pull interceptors from DI
+    provideHttpClient(withInterceptorsFromDi()),
+
+    // Register our JWT appender (only affects POST /tax per its own logic)
+    { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
   ]
 };
