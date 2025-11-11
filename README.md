@@ -1,11 +1,45 @@
 # TaxBuddy AI
-
 **An AI-Powered Tax Recommendation App (Angular + FastAPI + Azure)**
 
-Get personalized, AI-generated tax-saving tips by logging in, entering your tax info, and receiving instant suggestions powered by Azure OpenAI. Built as a hands-on learning project to master cloud-native full-stack architecture, secure authentication, and LLM (Large Language Model) integration.
+TaxBuddy AI helps users uncover personalized, AI-generated tax-saving tips.
+You simply log in, enter your income and deductions, and the system instantly returns a friendly recommendation powered by Azure OpenAI (GPT-4o) — all running securely on the backend.
 
-> MVP in progress — designed for modern authentication, modular API, robust SQL storage, and seamless cloud deployment.  
-> Built to demonstrate enterprise-ready patterns: CI/CD, state management, and AI-powered features.
+> MVP in progress — designed for secure authentication, modular APIs, robust Azure SQL storage, 
+> and backend-only AI integration.  
+> Built to demonstrate enterprise-ready architecture: CI/CD pipelines, cloud infrastructure, and AI-powered logic.
+
+---
+
+### How the AI Works
+
+When you enter your financial details (like income and deductions), the **FastAPI** backend sends that  
+information securely to **Azure OpenAI**.  
+The AI model — similar to ChatGPT — analyzes the inputs and returns a personalized tax tip,  
+such as: "*Consider contributing to an IRA to lower taxable income."*
+
+> **Why the AI runs only in the backend:**
+
+- **Security:** Sensitive data (income, deductions) never touches the browser-side model — it stays on the secure server.  
+- **Scalability:** The backend can manage multiple user requests, store results, and log AI usage or cost analytics.  
+- **Maintainability:** If you switch AI models (e.g., GPT-4o → newer version), you update the FastAPI logic — not the frontend.  
+- **Professional architecture:** Real enterprise systems always handle AI calls server-side to protect data and API keys.
+
+So, while users only see a clean and fast UI, the entire intelligence layer lives in FastAPI — managing data, calling OpenAI, and returning results safely.
+
+---
+
+### What the User Enters
+
+In the upcoming version, users will input simple tax details such as:
+
+- W-2 income or total annual income  
+- Estimated deductions (standard or itemized)  
+- Optional fields for dependents, filing status, or pre-tax contributions  
+
+These inputs are securely processed by the backend, which sends a summarized prompt to Azure OpenAI.  
+The AI then generates personalized, plain-language tax guidance — for example:  
+> “Try increasing your 401(k) contributions to reduce taxable income by up to $3,000.”
+
 
 ---
 
@@ -14,9 +48,10 @@ Get personalized, AI-generated tax-saving tips by logging in, entering your tax 
 - **Frontend**: Angular + TypeScript + RxJS + Bootstrap
 - **Backend**: Python + FastAPI + SQLAlchemy + PyODBC + Pydantic
 - **Database**: Azure SQL
-- **Cloud & AI**: Azure App Services, Azure OpenAI, Azure DevOps
-- **Authentication**: JWT (OAuth2 simulation)
-- **Testing**: (Planned) Pytest, Swagger UI, E2E with Cypress/Protractor
+- **AI Platform**: Azure OpenAI (GPT-4o)
+- **Cloud & DevOps**: Azure App Services + Azure DevOps
+- **Authentication**: JWT (OAuth2- style)
+- **Testing**: Swagger UI (manual) → Pytest/Cypress (planned)
 
 ---
 
@@ -24,8 +59,9 @@ Get personalized, AI-generated tax-saving tips by logging in, entering your tax 
 
 - **JWT Tokens**: Issued on login, required for all protected API routes
 - **OAuth2 Simulated**: Secure token flow via FastAPI
-- **.env Protection**: Connection strings & secrets excluded with `.gitignore`
-- **Verified with Swagger UI**: Authenticated flow tested end-to-end
+- **Frontend Guarding**: Angular AuthGuard + Interceptor enforce route access
+- **.env Protection**: API keys and connection strings hidden from repo
+- **Verified**: Authenticated flow tested via Swagger UI
 
 ---
 
@@ -33,22 +69,24 @@ Get personalized, AI-generated tax-saving tips by logging in, entering your tax 
 
 ### What You Can Do (Current Features)
 
-- **Angular frontend is live:** Loads login, tax form and result pages (UI scaffold)
-- **Backend is running:** Responds to auth and tax POST requests (mock logic for demo/testing)
-- **Test backend endpoints via Swagger UI:** (/auth/login, /tax/)
-These respond with stub/dummy data (no real authentication or AI yet)
-- **View API docs and test POST requests** at http://localhost:8000/docs
+- **Angular frontend is live:** Angular app fully functional: login → form → result
+- **Backend is running:** Backend handles POST /tax requests and returns AI-generated tips
+- **Testing:** Swagger UI available for API testing (/auth/login, /tax)
+- **Modular structure**: routes, guards, services, and interceptors
+- **Integration**: Backend integrated with Azure SQL (connection verified)
 
 ### What's Coming Next
 
-- **Real Authentication:** Implementing full JWT auth with secure user storage and login flow
-- **AI Powered Tax Tips:** Connecting to Azure OpenAI (GPT-4o) for live, personalized tax-saving advice
-- **Database Integration:** Persisting all user queries and AI tips in Azure SQL for analytics and future retrieval
+- **Real Authentication:** Real JWT verification (login/register persistence)
+- **SQL Data Persistecne:** Store all tax queries and AI responses in Azure SQL for history and analytics
+- **AI Logging & Cost Tracking:** Record token usage and cost per Azure OpenAI call for transparency and optimization
+- **AI Powered Tax Tips:** Azure OpenAI (GPT-4o) integrated via services/llm.py
+- **Database Integration:** Database storage for all user queries and AI responses
 - **Role-Based Access:** Adding admin and user roles, with protected endpoints and permission logic
 - **End-to-End Angular Flow:** Completing form submission, dynamic result display, and error handling in the UI
-- **User Experience Upgrades:** Improving validation, error messages, and interactive feedback throughout the app
-- **Deployment Pipeline:** Setting up CI/CD and production deployment on Azure App Services and DevOps
-- **Document-Based AI (RAG):** Planning future expansion to Retrieval-Augmented Generation for richer, document-sourced answers
+- **Enhanced User Experience:** Add dynamic validation, clearer error messages, loading states, and feedback animations for form submission
+- **Deployment Pipeline:** Configure CI/CD in Azure DevOps and deploy both FastAPI (backend) and Angular (frontend) to Azure App Services
+- **Phase 2 - Document-Based AI (RAG):** Future expansion to Retrieval-Augmented Generation — where the app references real tax documents or IRS publications to generate richer, source-backed recommendations
 
 ---
 
@@ -63,7 +101,10 @@ These respond with stub/dummy data (no real authentication or AI yet)
 ### **Backend (FastAPI)**
 
 - `/auth/login`: User login, JWT issued
-- `/tax/`: Accepts tax data, triggers AI, stores & returns result
+- `/auth/register`: Registers new user
+- `/tax/`: Creates new query, calls AI model, returns { id, tip }
+- `/tax/queries/{id}`: Retrieves past results
+- `/taxcheck`: Confirms DB connection
 
 ---
 
@@ -73,8 +114,10 @@ These respond with stub/dummy data (no real authentication or AI yet)
    — Authenticate, receive JWT
 2. **POST** `/tax/`  
    — Submit tax form (JWT required), get tip + save to DB
-3. **GET** `/docs`  
-   — Explore endpoints and test flow
+3. **GET** `/tax/queries/{id}` 
+   — Fetch the saved tip for that session
+4. **GET** `/docs`  
+   — Explore endpoints via Swagger UI
 
 ---
 
@@ -102,10 +145,10 @@ The current MVP is in progress, but I’m already designing for robust Azure SQL
 
 ## Deployment Plan
 
-- **Frontend**: Build with `ng build --prod`, deploy `/dist` to Azure App Service or Static Web Apps
-- **Backend**: Zip FastAPI server and deploy to Azure App Service
-- **CI/CD**: Managed with Azure DevOps pipelines (build, test, deploy)
-- **Monitoring**: Azure App Insights for logs and metrics
+- **Frontend**: ng build --configuration production → deploy /dist to Azure App Service
+- **Backend**: Deploy FastAPI with Gunicorn
+- **CI/CD**: Azure DevOps pipelines for build/test/deploy
+- **Monitoring**: Azure App Insights for logs and performance tracking
 
 ---
 
@@ -114,21 +157,21 @@ The current MVP is in progress, but I’m already designing for robust Azure SQL
 **Local Quick Start**
 
 ```bash
-# Clone the repo
-git clone https://github.com/your-username/taxbuddy-ai.git
-cd taxbuddy-ai
+# Clone
+git clone https://github.com/cdepalma32/TaxBuddyAI.git
+cd TaxBuddyAI
 
 # Frontend
 cd client
 npm install
-ng serve   # runs at http://localhost:4200/
+ng serve   # http://localhost:4200/
 
 # Backend
 cd ../server
 python -m venv venv
-source venv/Scripts/activate    # (Windows)
+source venv/Scripts/activate
 pip install -r requirements.txt
-python -m uvicorn app.main:app --reload   # API at http://localhost:8000/docs
+python -m uvicorn app.main:app --reload   # http://localhost:8000/docs
 
 # Add your .env with: 
 AZURE_SQL_CONNECTION_STRING=...
@@ -144,34 +187,30 @@ Planned: Backend unit/integration (pytest), frontend E2E
 
 ## LEARNING PATH / MILESTONES
 
-- [x] **Step 1:** Frontend setup — Angular, RxJS — Login & tax form UI
-- [x] **Step 2:** Backend setup — FastAPI, JWT — REST API: login + tax endpoint (stubbed)
-- [ ] **Step 3:** Auth/Microservices — OAuth2, Gateway — Secure API, split services
-- [ ] **Step 4:** Azure SQL & DB — SQLAlchemy — Connect + write to DB
-- [ ] **Step 5:** Azure DevOps/CI/CD — Pipelines — FE + BE deployed to Azure
-- [ ] **Step 6:** Azure OpenAI — GPT-4o — AI-powered tips
-- [ ] **Step 7:** Refactor, Docs — PyTorch (opt) — Polish, test, write docs
-
-
-
+- [x] **Step 1:** Frontend setup — Angular + RxJS → Login → Tax Form → Result flow
+- [x] **Step 2:** Backend setup — FastAPI + JWT → Auth routes, /tax endpoint (stubbed)
+- [x] **Step 3:** Routing & Guards — Implemented Angular AuthGuard + Interceptor for secure navigation
+- [ ] **Step 4:** Azure SQL Integration — Connect via SQLAlchemy and write user queries to DB
+- [ ] **Step 5:** Azure OpenAI Integration — Backend-only LLM (GPT-4o) for personalized tax tips
+- [ ] **Step 6:** Authentication Persistence — Full JWT verification + refresh tokens across sessions
+- [ ] **Step 7:** CI/CD Deployment — Configure Azure DevOps pipeline and deploy FE + BE to App Services
+- [ ] **Step 8:** Observability & Monitoring — Enable Application Insights for metrics and AI latency tracking
+- [ ] **Step 9:** UX Enhancements — Validation, error feedback, and polished UI interactions
+- [ ] **Step 10:** Documentation & Testing — Write technical docs + add unit/integration tests
 ---
 
 ## FUTURE IDEAS
- - RAG (Retrieval-Augmented Generation) for richer answers
- - Role-based dashboards
- - Advanced analytics/logging
- - Key Vault integration for secrets
- - PyTorch LLM proof-of-concept
+ - **Document-Based AI (RAG):** Retrieval-Augmented Generation using real IRS/tax documents
+ - **Role-based dashboards:** Admin vs. User views with query history and analytics
+ - **Advanced analytics/logging:** Track token usage, AI costs, and user query patterns
+ - **Key Vault Integration:** Secure storage for secrets and API keys
+ - **AI Analytics Dashboard:** Visualize AI cost, latency, and accuracy over time
 
 ---
 
 ## Why This Project?
-TaxBuddy AI was inspired by my desire to build and learn with the technologies shaping modern enterprise solutions—Angular, FastAPI, Azure, SQL, and AI-powered features. I wanted to challenge myself by building a full-stack application that mirrors the complexity and scale of today’s real-world engineering problems, including secure authentication, clean API design, and LLM integration.
-
-As I continue growing as a developer, I’m especially interested in working at the intersection of backend systems, cloud platforms, and AI—collaborating with product teams and data scientists to deliver meaningful features.
-
-It represents my commitment to learning and applying modern architectures—and my enthusiasm for contributing to forward-thinking, AI-driven engineering teams.
-
+TaxBuddy AI is both a learning journey and portfolio build — proving how to connect modern full-stack systems using Angular, FastAPI, Azure SQL, and OpenAI in a production-ready way.
+It demonstrates secure data flow, modular architecture, and cloud scalability, all with a clear user benefit: smarter, personalized financial insights.
 
 ---
 
