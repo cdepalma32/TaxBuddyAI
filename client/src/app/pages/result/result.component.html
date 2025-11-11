@@ -1,1 +1,21 @@
 <p>result works!</p>
+<!-- client/src/app/pages/result/result.component.html -->
+<div class="card">
+  <h2>Your Tax Tip</h2>
+
+  <ng-container *ngIf="loading">Loading…</ng-container>
+  <div class="error" *ngIf="!loading && errorMsg">{{ errorMsg }}</div>
+
+  <ng-container *ngIf="!loading && data">
+    <p class="tip">{{ data.tip }}</p>
+
+    <div class="meta">
+      <div>Income: {{ data.income | currency:'USD':'symbol' }}</div>
+      <div>Deductions: {{ data.deductions | currency:'USD':'symbol' }}</div>
+      <div *ngIf="data.created_at">Created: {{ data.created_at | date:'medium' }}</div>
+      <div>ID: #{{ data.id }}</div>
+    </div>
+
+    <a class="btn mt" routerLink="/tax-form">Try Another</a>
+  </ng-container>
+</div>

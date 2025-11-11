@@ -1,17 +1,17 @@
-<form (ngSubmit)="submit()">
+<form (ngSubmit)="submit()" #f="ngForm" class="card">
+  <h2>Tax Form</h2>
+
   <label>
     Income
-    <input type="number" [(ngModel)]="income" name="income" required />
+    <input type="number" name="income" [(ngModel)]="income" required />
   </label>
 
   <label>
     Deductions
-    <input type="number" [(ngModel)]="deductions" name="deductions" required />
+    <input type="number" name="deductions" [(ngModel)]="deductions" required />
   </label>
 
-  <button type="submit" [disabled]="loading">Get Tip</button>
-</form>
+  <button type="submit" [disabled]="loading || f.invalid">Get Tip</button>
 
-<p *ngIf="loading">Calculating…</p>
-<p *ngIf="errorMsg" class="error">{{ errorMsg }}</p>
-<pre *ngIf="tip">Tip: {{ tip }}</pre>
+  <div class="error" *ngIf="errorMsg">{{ errorMsg }}</div>
+</form>

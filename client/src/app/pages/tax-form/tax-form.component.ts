@@ -2,7 +2,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { TaxService, CreateTaxResponse } from '../../services/tax.service';
 
 @Component({
   selector: 'app-tax-form',
@@ -14,23 +15,25 @@ import { HttpClient } from '@angular/common/http';
 export class TaxFormComponent {
   income = 0;
   deductions = 0;
-  tip = '';
   loading = false;
   errorMsg = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(private tax: TaxService, private router: Router) {}
 
   submit() {
     this.loading = true;
     this.errorMsg = '';
-    this.tip = '';
 
-    this.http.post<{ tip: string }>('http://127.0.0.1:8000/tax/', {
-      income: this.income,
-      deductions: this.deductions
-    }).subscribe({
-      next: res => { this.tip = res.tip; this.loading = false; },
-      error: err => { this.errorMsg = err?.error?.detail || 'Request failed'; this.loading = false; }
-    });
+    this.tax.createTax({ income: this.income, deductions: this.deductions })
+      .subscribe({
+        next: (res: CreateTaxResponse) => {
+          this.router.navigate(['/result', res.id]); // deep-linkable result
+        },
+        error: (err) => {
+          this.errorMsg = err?.error?.detail || 'Request failed';
+          this.loading = false;
+        },
+        complete: () => { this.loading = false; }
+      });
   }
 }

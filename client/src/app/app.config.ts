@@ -7,7 +7,7 @@ import {
 } from '@angular/common/http';
 
 import { appRoutes } from './app.routes';
-import { TokenInterceptor } from './services/token-interceptor.service';
+import { AuthInterceptor } from './interceptors/token-interceptor.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -19,6 +19,6 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptorsFromDi()),
 
     // Register our JWT appender (only affects POST /tax per its own logic)
-    { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
   ]
 };
