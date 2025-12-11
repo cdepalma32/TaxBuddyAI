@@ -41,7 +41,7 @@ def signup_user(body: SignupInput, db: Session = Depends(get_db)):
 
     db.execute(
         text("""
-            INSERT INTO dbo.users (email, [password], [role], created_at)
+            INSERT INTO dbo.users (email, hashed_password, [role], created_at)
             VALUES (:email, :pw, :role, SYSUTCDATETIME())
         """),
         {"email": body.email, "pw": hashed_pw, "role": body.role}
@@ -56,7 +56,11 @@ def login_user(body: LoginInput, db: Session = Depends(get_db)):
     """Authenticate user and return JWT token."""
     row = db.execute(
         text("""
-            SELECT TOP (1) id, email, [password], [role]
+            SELECT TOP (1)
+                id,
+                email,
+                hashed_password AS password_hash,
+                [role]          AS user_role
             FROM [dbo].[users]
             WHERE email = :email
         """),
@@ -66,14 +70,19 @@ def login_user(body: LoginInput, db: Session = Depends(get_db)):
     if not row:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    if not bcrypt.verify(body.password, row.password):
+    # Use the alias we defined in SQL: password_hash
+    if not bcrypt.verify(body.password, row.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     token = create_access_token(sub=row.email)
     return {
         "access_token": token,
         "token_type": "bearer",
-        "user": {"id": row.id, "email": row.email, "role": row.role},
+        "user": {
+            "id": row.id,
+            "email": row.email,
+            "role": row.user_role,
+        },
     }
 
 
@@ -95,7 +104,10 @@ def get_current_user(
 
     row = db.execute(
         text("""
-            SELECT TOP (1) id, email, [role]
+            SELECT TOP (1)
+                id,
+                email,
+                [role] AS user_role
             FROM [dbo].[users]
             WHERE email = :email
         """),
@@ -105,4 +117,8 @@ def get_current_user(
     if not row:
         raise HTTPException(status_code=404, detail="User not found")
 
-    return {"id": row.id, "email": row.email, "role": row.role}
+    return {
+        "id": row.id,
+        "email": row.email,
+        "role": row.user_role,
+    }
